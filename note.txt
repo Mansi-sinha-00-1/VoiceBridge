@@ -1,0 +1,12 @@
+# Assistive Voice Communication System
+ ======================================
+
+converts: 
+---------
+Text to voice (english, indian english)
+
+Voice to text (english, indian english, hindi)
+
+Upcoming feature:
+-----------------
+Sign language

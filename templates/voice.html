@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="text-center mb-4">
+    <h2 class="neon">VoiceBridge</h2>
+    <p style="color:#00f7ff;">System Online • Awaiting Commands</p>
+</div>
+
+{% if error %}
+<div class="alert alert-warning text-center">
+    {{ error }}
+</div>
+{% endif %}
+
+
+<div class="row g-4">
+
+    <!-- LEFT PANEL -->
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="panel">
+
+            <h5 class="neon text-center">Command Input</h5>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-2 text-center">
+                    <button type="button" class="btn btn-outline-light btn-sm m-1" onclick="fillText('I need help')">Help</button>
+                    <button type="button" class="btn btn-outline-light btn-sm m-1" onclick="fillText('Call doctor immediately')">Doctor</button>
+                    <button type="button" class="btn btn-outline-light btn-sm m-1" onclick="fillText('Emergency! Please help me!')">Emergency</button>
+                </div>
+
+                <textarea name="text" class="form-control mb-2" rows="3" placeholder="Try commands like: Help, Doctor, Emergency"></textarea>
+
+                <button type="button" onclick="getSuggestions()" class="btn btn-ai mb-2 w-100">Generate Suggestions</button>
+
+                <button class="btn btn-ai btn-ai-success w-100">▶ Generate Voice</button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="panel text-center">
+
+            <h5 class="neon">Voice Output</h5>
+
+            {% if audio_url %}
+                <audio controls style="width:100%;" class="mt-3">
+                    <source src="{{ audio_url }}" type="audio/mpeg">
+                </audio>
+            {% else %}
+                <p class="mt-4">No output generated</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+        <div class="panel text-center">
+
+            <h5 class="neon">Voice Receiver</h5>
+
+            <button id="micBtn" class="btn btn-ai mb-2" onclick="toggleListening()">
+                Start Listening
+            </button>
+
+            <select id="languageSelect" class="form-control mb-2">
+                <option value="en-US">English</option>
+                <option value="hi-IN">Hindi</option>
+            </select>
+
+            <textarea id="speechOutput" class="form-control mb-2" rows="3"></textarea>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button class="btn btn-ai btn-ai-warning btn-sm" onclick="saveSpeechToBackend()">Save</button>
+                <button class="btn btn-ai btn-ai-success btn-sm" onclick="useSpeechText()">Use</button>
+                <button class="btn btn-ai btn-ai-danger btn-sm" onclick="clearText()">Clear</button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="mt-4">
+    <div class="panel">
+
+        <h5 class="neon text-center">Suggestions</h5>
+
+        <div id="suggestionsContainer" class="row mt-3">
+            <!-- Suggestions will appear here -->
+            <p class="text-center ">No suggestions yet</p>
+        </div>
+
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="panel">
+
+        <h5 class="neon text-center">SignLang</h5>
+
+        <div id="" class="row mt-3">
+            <p class="text-center ">Introducing a new feature soon to communicate with sign language!!</p>
+            <p class="text-center ">Comming Soon!!!</p>
+        </div>
+
+    </div>
+</div>
+
+
+<!--Voice generator js-->
+<script>
+function fillText(text) {
+    document.querySelector('textarea[name="text"]').value = text;
+}
+</script>
+
+<script>
+function quickSend(text) {
+    document.querySelector('textarea[name="text"]').value = text;
+    document.querySelector('form').submit();
+}
+</script>
+
+<!--Voice receiver js-->
+<script>
+let recognition;
+let isListening = false;
+let fullTranscript = "";
+
+{% comment %} function toggleListening() {
+
+    document.getElementById("micBtn").classList.toggle("active");
+
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert("Speech Recognition not supported in this browser");
+        return;
+    }
+
+    if (!recognition) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        let selectedLang = document.getElementById("languageSelect").value;
+        recognition.start();
+        recognition.lang = selectedLang;
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+
+        recognition.onresult = function(event) {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                let text = event.results[i][0].transcript;
+            
+                if (event.results[i].isFinal) {
+                    fullTranscript += text.trim() + ".\n";
+                }
+            }
+        
+            document.getElementById("speechOutput").value = fullTranscript;
+            document.getElementById("speechOutput").scrollTop = 
+                document.getElementById("speechOutput").scrollHeight;
+        };
+
+        recognition.onerror = function(event) {
+            console.error(event.error);
+        };
+
+        recognition.onend = function() {
+            if (fullTranscript.trim() !== "") {
+                saveSpeechToBackend();
+            }
+        };
+    }
+
+    if (!isListening) {
+        recognition.start();
+        isListening = true;
+        document.getElementById("micBtn").innerText = "Stop Listening";
+        document.getElementById("micBtn").classList.remove("btn-primary");
+        document.getElementById("micBtn").classList.add("btn-danger");
+    } else {
+        recognition.stop();
+        isListening = false;
+        document.getElementById("micBtn").innerText = "Start Listening";
+        document.getElementById("micBtn").classList.remove("btn-danger");
+        document.getElementById("micBtn").classList.add("btn-primary");
+    }
+} {% endcomment %}
+
+function toggleListening() {
+
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert("Speech Recognition not supported in this browser");
+        return;
+    }
+
+    if (!recognition) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = function(event) {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                let text = event.results[i][0].transcript;
+
+                if (event.results[i].isFinal) {
+                    fullTranscript += text.trim() + ".\n";
+                }
+            }
+
+            document.getElementById("speechOutput").value = fullTranscript;
+        };
+
+        recognition.onerror = function(event) {
+            console.error(event.error);
+        };
+
+        recognition.onend = function() {
+            isListening = false;
+            document.getElementById("micBtn").innerText = "Start Listening";
+        };
+    }
+
+    if (!isListening) {
+        let selectedLang = document.getElementById("languageSelect").value;
+        recognition.lang = selectedLang;
+
+        recognition.start();
+        isListening = true;
+
+        document.getElementById("micBtn").innerText = "Stop Listening";
+    } else {
+        recognition.stop();
+        isListening = false;
+
+        document.getElementById("micBtn").innerText = "Start Listening";
+    }
+}
+
+function saveSpeechToBackend() {
+    let text = document.getElementById("speechOutput").value;
+
+    fetch("/voice/save-speech/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: "text=" + encodeURIComponent(text)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert("Saved to history!");
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function useSpeechText() {
+    let text = document.getElementById("speechOutput").value;
+    document.querySelector('textarea[name="text"]').value = text;
+}
+
+function clearText() {
+    fullTranscript = "";
+    document.getElementById("speechOutput").value = "";
+}
+</script>
+
+
+<!--Suggestions-->
+<script>
+function getSuggestions() {
+    let text = document.querySelector('textarea[name="text"]').value;
+
+    if (!text.trim()) {
+        alert("Enter text first");
+        return;
+    }
+
+    let container = document.getElementById("suggestionsContainer");
+    container.innerHTML = "";
+
+    fetch("/voice/suggest-text/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: text })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let container = document.getElementById("suggestionsContainer");
+        container.innerHTML = "";
+
+        data.results.forEach(s => {
+            let col = document.createElement("div");
+            col.className = "col-lg-3 col-md-6 col-sm-12";
+
+            col.innerHTML = `
+                <div class="glass p-3 mb-3 futuristic-card">
+                    <h6 class="neon">${s.type}</h6>
+                    <p>${s.text}</p>
+                    <button class="btn btn-ai-success btn-sm w-100"
+                        onclick="useSuggestion(\`${s.text}\`)">
+                        Use This
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(col);
+        });
+    });
+}
+
+function useSuggestion(text) {
+    document.querySelector('textarea[name="text"]').value = text;
+}
+</script>
+
+{% endblock %}

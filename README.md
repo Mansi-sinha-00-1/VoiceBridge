@@ -1,6 +1,6 @@
 # VoiceBridge
 
-VoiceBridge is an AI-powered web application that converts text into speech and captures voice input to assist communication, especially for users who have difficulty speaking.
+VoiceBridge is an web application that converts text into speech and captures voice input to assist communication, especially for users who have difficulty speaking.
 
 ---
 

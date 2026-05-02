@@ -61,7 +61,7 @@
 
     <!-- CENTER PANEL -->
     <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-        <div class="panel text-center">
+        <div id="voice-output-section" class="panel text-center">
 
             <h5 class="neon">Voice Output</h5>
 
@@ -104,7 +104,7 @@
 
 </div>
 
-<div class="mt-4">
+<div id="suggestions-section" class="mt-4">
     <div class="panel">
 
         <h5 class="neon text-center">Suggestions</h5>
@@ -348,12 +348,26 @@ function getSuggestions() {
 
             container.appendChild(col);
         });
+
+        document.getElementById("suggestions-section")
+            .scrollIntoView({ behavior: "smooth" });
     });
 }
 
 function useSuggestion(text) {
     document.querySelector('textarea[name="text"]').value = text;
 }
+</script>
+
+<script>
+window.onload = function () {
+    const hasAudio = "{{ audio_url|default:'' }}";
+
+    if (hasAudio) {
+        document.getElementById("voice-output-section")
+            .scrollIntoView({ behavior: "smooth" });
+    }
+};
 </script>
 
 {% endblock %}

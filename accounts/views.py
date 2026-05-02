@@ -9,20 +9,20 @@ def register_view(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # 🔥 Check if user exists
+        # Check if user exists
         if User.objects.filter(username=username).exists():
             return render(request, "register.html", {
                 "error": "Username already exists"
             })
 
-        # 🔥 Create user properly
+        # Create user properly
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
 
-        return redirect('login')   # ✅ now it WILL redirect
+        return redirect('login')
 
     return render(request, "register.html")
 
@@ -35,7 +35,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect('voice_home')   # 🔥 go to home
+            return redirect('voice_home')
 
         else:
             return render(request, 'login.html', {

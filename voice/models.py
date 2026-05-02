@@ -14,9 +14,7 @@ class VoiceHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     audio_file = models.FileField(upload_to='audio/', null=True, blank=True)
-
-    #  NEW FIELD
     source = models.CharField(max_length=20, default='text')  
-    # 'text' = typed, 'speech' = mic
-
+    mode = models.CharField(max_length=20, default="accent")
+    language = models.CharField(max_length=10, default="en")
     created_at = models.DateTimeField(auto_now_add=True)

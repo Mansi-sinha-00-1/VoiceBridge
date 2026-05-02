@@ -5,35 +5,63 @@
 <h2>Your Voice History</h2>
 
 {% for item in records %}
-<div class="mb-4 p-3 glass futuristic-card">
-    <p>
-        <strong>
-            {% if item.source == "speech" %}
-                Speech:
-            {% else %}
-                Text:
-            {% endif %}
-        </strong>
-        {{ item.text }}
-    </p>
 
-    {% if item.audio_file and item.audio_file.name %}
-        <audio controls>
-            <source src="{{ item.audio_file.url }}" type="audio/mpeg">
-        </audio>
-    {% endif %}
+<div class="mb-4 p-3 glass futuristic-card history-card">
 
-    <form action="{% url 'delete_voice' item.id %}" method="POST" class="mt-2">
-        {% csrf_token %}
-        <button  class="btn btn-ai btn-ai-danger btn-sm" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
-    </form>
+    <!-- LEFT SIDE -->
+    <div class="history-left">
+        <p>
+            <strong>
+                {% if item.source == "speech" %}
+                    Speech:
+                {% else %}
+                    Text:
+                {% endif %}
+            </strong>
+            {{ item.text }}
+        </p>
 
-    {% if item.audio_file and item.audio_file.name %}
-        <a href="{{ item.audio_file.url }}" download class="btn btn-ai btn-ai-success btn-sm mt-2">
-            Download
-        </a>
-    {% endif %}
+        <div class="meta-info mt-2">
+            <strong>
+                {% if item.mode == "translate" %}
+                    Translate
+                {% else %}
+                    Accent
+                {% endif %}
+            </strong>
+
+            <span >
+                {{ item.language|upper }}
+            </span>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="history-right">
+        {% if item.audio_file and item.audio_file.name %}
+            <audio controls>
+                <source src="{{ item.audio_file.url }}" type="audio/mpeg">
+            </audio>
+
+            <div class="action-buttons mt-2">
+                <form action="{% url 'delete_voice' item.id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn btn-ai btn-ai-danger btn-sm"
+                        onclick="return confirm('Are you sure?')">
+                        Delete
+                    </button>
+                </form>
+
+                <a href="{{ item.audio_file.url }}" download
+                   class="btn btn-ai btn-ai-success btn-sm">
+                    Download
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
 </div>
+
 {% empty %}
 <p>No history yet.</p>
 {% endfor %}

@@ -18,7 +18,12 @@ def voice_home(request):
         engine = request.POST.get("engine", "gtts")
 
         if text:
-            audio_path = generate_voice(text, tone, language)
+            try:
+                audio_path = generate_voice(text, tone, language)
+                print("Generated:", audio_path)
+            except Exception as e:
+                print("VOICE ERROR:", e)
+                audio_path = None
 
             record = VoiceHistory.objects.create(
                 user=request.user,

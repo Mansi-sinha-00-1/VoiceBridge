@@ -1,24 +1,16 @@
-def generate_voice(text, tone="normal", language="en"):
-    import os
-    import uuid
-    from gtts import gTTS
+from django.conf import settings
+import os
+import uuid
+from gtts import gTTS
 
-    os.makedirs("media/audio", exist_ok=True)
+def generate_voice(text, tone="normal", language="en"):
+    audio_dir = os.path.join(settings.MEDIA_ROOT, "audio")
+    os.makedirs(audio_dir, exist_ok=True)
 
     filename = f"{uuid.uuid4()}.mp3"
-    full_path = os.path.join("media", "audio", filename)
-    relative_path = os.path.join("audio", filename)
+    full_path = os.path.join(audio_dir, filename)
 
-    # 🎯 Tone handling
-    if tone == "slow":
-        slow = True
-    elif tone == "fast":
-        slow = False
-        text = text.upper() + "!"
-    else:
-        slow = False
-
-    tts = gTTS(text=text, lang=language, slow=slow)
+    tts = gTTS(text=text, lang=language, slow=False)
     tts.save(full_path)
 
-    return relative_path
+    return f"audio/{filename}"
